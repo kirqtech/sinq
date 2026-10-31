@@ -4,10 +4,10 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 #include "PluginProcessor.h"
 
-class AntiTuneLookAndFeel : public juce::LookAndFeel_V4
+class SinqLookAndFeel : public juce::LookAndFeel_V4
 {
 public:
-    AntiTuneLookAndFeel()
+    SinqLookAndFeel()
     {
         setColour(juce::ComboBox::backgroundColourId, juce::Colour(0xff141824));
         setColour(juce::ComboBox::outlineColourId, juce::Colour(0xff2c3550));
@@ -62,12 +62,12 @@ public:
     }
 };
 
-class AntiTuneAudioProcessorEditor : public juce::AudioProcessorEditor,
+class SinqAudioProcessorEditor : public juce::AudioProcessorEditor,
                                      private juce::Timer
 {
 public:
-    explicit AntiTuneAudioProcessorEditor(AntiTuneAudioProcessor&);
-    ~AntiTuneAudioProcessorEditor() override;
+    explicit SinqAudioProcessorEditor(SinqAudioProcessor&);
+    ~SinqAudioProcessorEditor() override;
 
     void paint(juce::Graphics&) override;
     void resized() override;
@@ -79,8 +79,8 @@ private:
     void drawPitchHistoryGraph(juce::Graphics& g, juce::Rectangle<float> bounds);
     void drawScaleKeyboard(juce::Graphics& g, juce::Rectangle<float> bounds);
 
-    AntiTuneAudioProcessor& audioProcessor;
-    AntiTuneLookAndFeel customLookAndFeel;
+    SinqAudioProcessor& audioProcessor;
+    SinqLookAndFeel customLookAndFeel;
 
     juce::ComboBox keyCombo;
     juce::ComboBox scaleCombo;
@@ -117,5 +117,5 @@ private:
     juce::Rectangle<float> keyboardBounds;
     std::array<juce::Rectangle<float>, 12> noteKeyRects;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AntiTuneAudioProcessorEditor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SinqAudioProcessorEditor)
 };

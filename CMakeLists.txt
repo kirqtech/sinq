@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(AntiTune VERSION 1.0.0 LANGUAGES C CXX)
+project(sinq VERSION 1.0.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -16,14 +16,14 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(JUCE)
 
-juce_add_plugin(AntiTune
-    COMPANY_NAME "AntiTune Audio"
-    BUNDLE_ID "com.antitune.plugin"
-    PLUGIN_MANUFACTURER_CODE AntT
-    PLUGIN_CODE At01
+juce_add_plugin(sinq
+    COMPANY_NAME "sinq"
+    BUNDLE_ID "com.sinq.plugin"
+    PLUGIN_MANUFACTURER_CODE Sinq
+    PLUGIN_CODE Sq01
     FORMATS AU VST3 Standalone
     AU_MAIN_TYPE kAudioUnitType_Effect
-    PRODUCT_NAME "AntiTune"
+    PRODUCT_NAME "sinq"
     IS_SYNTH FALSE
     NEEDS_MIDI_INPUT FALSE
     NEEDS_MIDI_OUTPUT FALSE
@@ -31,10 +31,10 @@ juce_add_plugin(AntiTune
     EDITOR_WANTS_KEYBOARD_FOCUS FALSE
     COPY_PLUGIN_AFTER_BUILD FALSE
     MICROPHONE_PERMISSION_ENABLED TRUE
-    MICROPHONE_PERMISSION_TEXT "AntiTune needs microphone access for real-time vocal pitch correction and laser auto-tune."
+    MICROPHONE_PERMISSION_TEXT "sinq needs microphone access for real-time vocal pitch correction and laser auto-tune."
 )
 
-target_sources(AntiTune
+target_sources(sinq
     PRIVATE
         Source/PluginProcessor.cpp
         Source/PluginProcessor.h
@@ -45,14 +45,14 @@ target_sources(AntiTune
         Source/LaserPitchShifter.h
 )
 
-target_compile_definitions(AntiTune
+target_compile_definitions(sinq
     PUBLIC
         JUCE_WEB_BROWSER=0
         JUCE_USE_CURL=0
         JUCE_VST3_CAN_REPLACE_VST2=0
 )
 
-target_link_libraries(AntiTune
+target_link_libraries(sinq
     PRIVATE
         juce::juce_audio_utils
         juce::juce_audio_processors

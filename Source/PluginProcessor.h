@@ -8,11 +8,11 @@
 #include "ScaleQuantizer.h"
 #include "LaserPitchShifter.h"
 
-class AntiTuneAudioProcessor : public juce::AudioProcessor
+class SinqAudioProcessor : public juce::AudioProcessor
 {
 public:
-    AntiTuneAudioProcessor();
-    ~AntiTuneAudioProcessor() override;
+    SinqAudioProcessor();
+    ~SinqAudioProcessor() override;
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
@@ -79,9 +79,9 @@ public:
 private:
     juce::AudioProcessorValueTreeState apvts;
 
-    antitune::PitchDetector pitchDetector;
-    antitune::LaserPitchShifter shifterL;
-    antitune::LaserPitchShifter shifterR;
+    sinq::PitchDetector pitchDetector;
+    sinq::LaserPitchShifter shifterL;
+    sinq::LaserPitchShifter shifterR;
 
     Telemetry telemetry;
 
@@ -100,5 +100,5 @@ private:
     std::atomic<int> historyWritePos { 0 };
     int historySampleCounter = 0;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AntiTuneAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SinqAudioProcessor)
 };

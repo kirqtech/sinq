@@ -1,7 +1,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-AntiTuneAudioProcessor::AntiTuneAudioProcessor()
+SinqAudioProcessor::SinqAudioProcessor()
     : AudioProcessor(BusesProperties()
                          .withInput("Input", juce::AudioChannelSet::stereo(), true)
                          .withOutput("Output", juce::AudioChannelSet::stereo(), true)),
@@ -11,9 +11,9 @@ AntiTuneAudioProcessor::AntiTuneAudioProcessor()
         ov.store(-1);
 }
 
-AntiTuneAudioProcessor::~AntiTuneAudioProcessor() = default;
+SinqAudioProcessor::~SinqAudioProcessor() = default;
 
-juce::AudioProcessorValueTreeState::ParameterLayout AntiTuneAudioProcessor::createParameterLayout()
+juce::AudioProcessorValueTreeState::ParameterLayout SinqAudioProcessor::createParameterLayout()
 {
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
@@ -77,18 +77,18 @@ juce::AudioProcessorValueTreeState::ParameterLayout AntiTuneAudioProcessor::crea
     return { params.begin(), params.end() };
 }
 
-const juce::String AntiTuneAudioProcessor::getName() const { return JucePlugin_Name; }
-bool AntiTuneAudioProcessor::acceptsMidi() const { return false; }
-bool AntiTuneAudioProcessor::producesMidi() const { return false; }
-bool AntiTuneAudioProcessor::isMidiEffect() const { return false; }
-double AntiTuneAudioProcessor::getTailLengthSeconds() const { return 0.0; }
-int AntiTuneAudioProcessor::getNumPrograms() { return 1; }
-int AntiTuneAudioProcessor::getCurrentProgram() { return 0; }
-void AntiTuneAudioProcessor::setCurrentProgram(int) {}
-const juce::String AntiTuneAudioProcessor::getProgramName(int) { return {}; }
-void AntiTuneAudioProcessor::changeProgramName(int, const juce::String&) {}
+const juce::String SinqAudioProcessor::getName() const { return JucePlugin_Name; }
+bool SinqAudioProcessor::acceptsMidi() const { return false; }
+bool SinqAudioProcessor::producesMidi() const { return false; }
+bool SinqAudioProcessor::isMidiEffect() const { return false; }
+double SinqAudioProcessor::getTailLengthSeconds() const { return 0.0; }
+int SinqAudioProcessor::getNumPrograms() { return 1; }
+int SinqAudioProcessor::getCurrentProgram() { return 0; }
+void SinqAudioProcessor::setCurrentProgram(int) {}
+const juce::String SinqAudioProcessor::getProgramName(int) { return {}; }
+void SinqAudioProcessor::changeProgramName(int, const juce::String&) {}
 
-void AntiTuneAudioProcessor::prepareToPlay(double sampleRate, int /*samplesPerBlock*/)
+void SinqAudioProcessor::prepareToPlay(double sampleRate, int /*samplesPerBlock*/)
 {
     pitchDetector.prepare(sampleRate);
     shifterL.prepare(sampleRate, 0);
@@ -104,13 +104,13 @@ void AntiTuneAudioProcessor::prepareToPlay(double sampleRate, int /*samplesPerBl
     setLatencySamples(shifterL.getLatencySamples());
 }
 
-void AntiTuneAudioProcessor::releaseResources()
+void SinqAudioProcessor::releaseResources()
 {
     shifterL.reset();
     shifterR.reset();
 }
 
-bool AntiTuneAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
+bool SinqAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
 {
     const auto& outSet = layouts.getMainOutputChannelSet();
     const auto& inSet  = layouts.getMainInputChannelSet();
@@ -124,13 +124,13 @@ bool AntiTuneAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts) 
     return true;
 }
 
-std::array<bool, 12> AntiTuneAudioProcessor::getActiveScaleMask() const
+std::array<bool, 12> SinqAudioProcessor::getActiveScaleMask() const
 {
     int rootKey = static_cast<int>(apvts.getRawParameterValue("rootKey")->load());
     int scaleChoice = static_cast<int>(apvts.getRawParameterValue("scaleType")->load());
 
-    antitune::ScaleType st = static_cast<antitune::ScaleType>(std::clamp(scaleChoice, 0, 9));
-    auto mask = antitune::ScaleQuantizer::getScaleMask(st, rootKey);
+    sinq::ScaleType st = static_cast<sinq::ScaleType>(std::clamp(scaleChoice, 0, 9));
+    auto mask = sinq::ScaleQuantizer::getScaleMask(st, rootKey);
 
     for (int i = 0; i < 12; ++i)
     {
@@ -141,31 +141,31 @@ std::array<bool, 12> AntiTuneAudioProcessor::getActiveScaleMask() const
     return mask;
 }
 
-void AntiTuneAudioProcessor::setNoteOverride(int pitchClass, bool enabled)
+void SinqAudioProcessor::setNoteOverride(int pitchClass, bool enabled)
 {
     if (pitchClass >= 0 && pitchClass < 12)
         noteOverrides[static_cast<size_t>(pitchClass)].store(enabled ? 1 : 0);
 }
 
-bool AntiTuneAudioProcessor::isNoteEnabled(int pitchClass) const
+bool SinqAudioProcessor::isNoteEnabled(int pitchClass) const
 {
     auto mask = getActiveScaleMask();
     return mask[static_cast<size_t>((pitchClass % 12 + 12) % 12)];
 }
 
-void AntiTuneAudioProcessor::clearNoteOverrides()
+void SinqAudioProcessor::clearNoteOverrides()
 {
     for (auto& ov : noteOverrides)
         ov.store(-1);
 }
 
-void AntiTuneAudioProcessor::getPitchHistory(std::array<HistoryPoint, kHistorySize>& outHistory, int& outWritePos) const
+void SinqAudioProcessor::getPitchHistory(std::array<HistoryPoint, kHistorySize>& outHistory, int& outWritePos) const
 {
     outWritePos = historyWritePos.load(std::memory_order_relaxed);
     outHistory = pitchHistory;
 }
 
-void AntiTuneAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& /*midiMessages*/)
+void SinqAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& /*midiMessages*/)
 {
     juce::ScopedNoDenormals noDenormals;
 
@@ -224,7 +224,7 @@ void AntiTuneAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce
 
             float sweepMidi = 55.0f + 5.0f * std::sin(6.283185307f * testLfoPhase)
                             + 0.18f * std::sin(6.283185307f * testLfoPhase * 13.0f);
-            float demoFreq = antitune::ScaleQuantizer::midiToFreq(sweepMidi);
+            float demoFreq = sinq::ScaleQuantizer::midiToFreq(sweepMidi);
 
             testCarrierPhase += demoFreq / sr;
             if (testCarrierPhase >= 1.0f) testCarrierPhase -= 1.0f;
@@ -242,18 +242,18 @@ void AntiTuneAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce
         inSumSq += monoIn * monoIn;
 
         // 1. Run 2x-decimated YIN pitch detector (triggers every ~5.8 ms hop)
-        antitune::PitchDetectionResult det;
+        sinq::PitchDetectionResult det;
         if (pitchDetector.pushSample(monoIn, det))
         {
             if (det.isVoiced && det.frequencyHz > 60.0f)
             {
                 unvoicedHopCount = 0;
 
-                float continuousMidi = antitune::ScaleQuantizer::freqToMidi(det.frequencyHz);
+                float continuousMidi = sinq::ScaleQuantizer::freqToMidi(det.frequencyHz);
                 lastDetectedMidi = continuousMidi;
 
                 // Quantize with VocalSnap's 0.62-semitone hysteresis so notes never flutter!
-                currentTargetNote = antitune::ScaleQuantizer::quantizeMidiNote(
+                currentTargetNote = sinq::ScaleQuantizer::quantizeMidiNote(
                     continuousMidi, scaleMask, currentTargetNote);
 
                 // Target shift = Correction Strength * (TargetNote - InputMidi) + Manual Pitch Shift
@@ -264,7 +264,7 @@ void AntiTuneAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce
                 shifterL.updateTargetGrainFromPitch(det.frequencyHz);
                 shifterR.updateTargetGrainFromPitch(det.frequencyHz);
 
-                float targetHz = antitune::ScaleQuantizer::midiToFreq(
+                float targetHz = sinq::ScaleQuantizer::midiToFreq(
                     static_cast<float>(currentTargetNote) + manualPitchSt);
                 float centsErr = (continuousMidi - static_cast<float>(currentTargetNote)) * 100.0f;
 
@@ -297,7 +297,7 @@ void AntiTuneAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce
         float pitchRatio = std::exp2(currentShiftSemitones / 12.0f);
 
         float vocoderCarrierHz = (currentTargetNote > 0)
-            ? antitune::ScaleQuantizer::midiToFreq(static_cast<float>(currentTargetNote) + manualPitchSt)
+            ? sinq::ScaleQuantizer::midiToFreq(static_cast<float>(currentTargetNote) + manualPitchSt)
             : 220.0f;
 
         bool isCurrentlyVoiced = (unvoicedHopCount < 4);
@@ -340,21 +340,21 @@ void AntiTuneAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce
     telemetry.outputRms.store(std::sqrt(outSumSq / static_cast<float>(numSamples)), std::memory_order_relaxed);
 }
 
-bool AntiTuneAudioProcessor::hasEditor() const { return true; }
+bool SinqAudioProcessor::hasEditor() const { return true; }
 
-juce::AudioProcessorEditor* AntiTuneAudioProcessor::createEditor()
+juce::AudioProcessorEditor* SinqAudioProcessor::createEditor()
 {
-    return new AntiTuneAudioProcessorEditor(*this);
+    return new SinqAudioProcessorEditor(*this);
 }
 
-void AntiTuneAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
+void SinqAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
 {
     auto state = apvts.copyState();
     std::unique_ptr<juce::XmlElement> xml(state.createXml());
     copyXmlToBinary(*xml, destData);
 }
 
-void AntiTuneAudioProcessor::setStateInformation(const void* data, int sizeInBytes)
+void SinqAudioProcessor::setStateInformation(const void* data, int sizeInBytes)
 {
     std::unique_ptr<juce::XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
     if (xmlState != nullptr && xmlState->hasTagName(apvts.state.getType()))
@@ -363,5 +363,5 @@ void AntiTuneAudioProcessor::setStateInformation(const void* data, int sizeInByt
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-    return new AntiTuneAudioProcessor();
+    return new SinqAudioProcessor();
 }

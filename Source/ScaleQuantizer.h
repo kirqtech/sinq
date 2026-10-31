@@ -4,7 +4,7 @@
 #include <array>
 #include <string>
 
-namespace antitune
+namespace sinq
 {
 
 enum class ScaleType : int
@@ -120,4 +120,4 @@ public:
     }
 };
 
-} // namespace antitune
+} // namespace sinq

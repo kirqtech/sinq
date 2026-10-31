@@ -1,6 +1,6 @@
-# AntiTune — Live T-Pain 0ms Pitch Correction & 20-Band Studio Vocoder
+# sinq — Live T-Pain 0ms Pitch Correction & 20-Band Studio Vocoder
 
-**AntiTune** is a real-time C++ / JUCE vocal processor built as a **Standalone macOS Application (`.app`)**, **VST3 Plugin (`.vst3`)**, and **Audio Unit Plugin (`.component`)**.
+**sinq** is a real-time C++ / JUCE vocal processor built as a **Standalone macOS Application (`.app`)**, **VST3 Plugin (`.vst3`)**, and **Audio Unit Plugin (`.component`)**.
 
 It combines a low-latency, phase-coupled pitch correction engine (modeled for zero-chop live vocal performance and instant `0 ms` T-Pain hard-snap steps) with an independent, switchable **20-Band Harmonic Studio Vocoder** and **Voice Pitch Shifter (`-12` to `+12` semitones)**.
 
@@ -8,13 +8,12 @@ It combines a low-latency, phase-coupled pitch correction engine (modeled for ze
 
 ## 📁 Project Structure
 
-If you only have the C++ source files and `CMakeLists.txt`, the repository layout looks like this:
+The repository layout looks like this:
 
 ```text
-antitune/
-├── CMakeLists.txt              # CMake build configuration (AU, VST3, Standalone)
+sinq/
+├── CMakeLists.txt              # CMake build configuration (AU, VST3, Standalone + JUCE FetchContent)
 ├── README.md                   # Build & installation documentation
-├── JUCE/                       # JUCE 8 framework (cloned during setup)
 └── Source/
     ├── PitchDetector.h         # 2x-decimated YIN real-time pitch detector
     ├── ScaleQuantizer.h        # Musical scales, custom 12-key mask & 0.62-semitone hysteresis
@@ -45,23 +44,16 @@ Before building the C++ source files into a runnable `.app`, `.vst3`, and `.comp
 
 ## 🚀 Step-by-Step Build Instructions
 
-Follow these steps from a terminal inside the project root directory (`/path/to/antitune`):
+Follow these steps from a terminal inside the project root directory (`/path/to/sinq`):
 
-### Step 1: Clone the JUCE Framework (if not already present)
-The project expects the **JUCE** library inside `./JUCE`. If the `JUCE` folder is missing or empty, clone JUCE 8.0.4 into the project root:
-
-```bash
-git clone --depth 1 --branch 8.0.4 https://github.com/juce-framework/JUCE.git JUCE
-```
-
-### Step 2: Configure the CMake Build System
-Generate the `Release` build directory (`./build`). This step compiles JUCE's helper tool (`juceaide`) and prepares the build files:
+### Step 1: Configure the CMake Build System
+Generate the `Release` build directory (`./build`). `CMakeLists.txt` uses CMake's `FetchContent` to automatically download **JUCE 8.0.4**, compile `juceaide`, and generate the build files:
 
 ```bash
 cmake -B build -DCMAKE_BUILD_TYPE=Release
 ```
 
-### Step 3: Compile All Targets (Standalone, VST3, and AU)
+### Step 2: Compile All Targets (Standalone, VST3, and AU)
 Compile the project using all available CPU cores (`-j 8`):
 
 ```bash
@@ -75,13 +67,13 @@ cmake --build build --config Release -j 8
 
 ## 📦 Where to Find the Built Files
 
-After the build reaches `100%`, your compiled binaries are located inside `build/AntiTune_artefacts/Release/`:
+After the build reaches `100%`, your compiled binaries are located inside `build/sinq_artefacts/Release/`:
 
 | Format | Built Artifact Path | Target Use |
 | :--- | :--- | :--- |
-| **Standalone App** | `build/AntiTune_artefacts/Release/Standalone/AntiTune.app` | Run directly on macOS with Mic & Headphones (no DAW needed) |
-| **Audio Unit (AU)** | `build/AntiTune_artefacts/Release/AU/AntiTune.component` | GarageBand, Logic Pro, Ableton Live (macOS) |
-| **VST3 Plugin** | `build/AntiTune_artefacts/Release/VST3/AntiTune.vst3` | Ableton Live, FL Studio, Reaper, Cubase |
+| **Standalone App** | `build/sinq_artefacts/Release/Standalone/sinq.app` | Run directly on macOS with Mic & Headphones (no DAW needed) |
+| **Audio Unit (AU)** | `build/sinq_artefacts/Release/AU/sinq.component` | GarageBand, Logic Pro, Ableton Live (macOS) |
+| **VST3 Plugin** | `build/sinq_artefacts/Release/VST3/sinq.vst3` | Ableton Live, FL Studio, Reaper, Cubase |
 
 ---
 
@@ -91,14 +83,14 @@ On Apple Silicon (`arm64`) Macs, macOS requires plugins and standalone bundles t
 
 ### 1. Ad-Hoc Code-Sign the Built Bundles
 ```bash
-codesign --force --deep --sign - build/AntiTune_artefacts/Release/AU/AntiTune.component
-codesign --force --deep --sign - build/AntiTune_artefacts/Release/VST3/AntiTune.vst3
-codesign --force --deep --sign - build/AntiTune_artefacts/Release/Standalone/AntiTune.app
+codesign --force --deep --sign - build/sinq_artefacts/Release/AU/sinq.component
+codesign --force --deep --sign - build/sinq_artefacts/Release/VST3/sinq.vst3
+codesign --force --deep --sign - build/sinq_artefacts/Release/Standalone/sinq.app
 ```
 
 ### 2. Copy Standalone App to Project Root (Optional Convenience)
 ```bash
-cp -R build/AntiTune_artefacts/Release/Standalone/AntiTune.app ./AntiTune.app
+cp -R build/sinq_artefacts/Release/Standalone/sinq.app ./sinq.app
 ```
 
 ### 3. Install AU and VST3 into Your macOS Audio Plug-Ins Folders
@@ -106,23 +98,23 @@ cp -R build/AntiTune_artefacts/Release/Standalone/AntiTune.app ./AntiTune.app
 mkdir -p ~/Library/Audio/Plug-Ins/Components
 mkdir -p ~/Library/Audio/Plug-Ins/VST3
 
-cp -R build/AntiTune_artefacts/Release/AU/AntiTune.component ~/Library/Audio/Plug-Ins/Components/
-cp -R build/AntiTune_artefacts/Release/VST3/AntiTune.vst3 ~/Library/Audio/Plug-Ins/VST3/
+cp -R build/sinq_artefacts/Release/AU/sinq.component ~/Library/Audio/Plug-Ins/Components/
+cp -R build/sinq_artefacts/Release/VST3/sinq.vst3 ~/Library/Audio/Plug-Ins/VST3/
 ```
 
 ### 4. Verify Audio Unit Registration (Optional)
 You can run Apple's official Audio Unit validation tool to confirm GarageBand and Logic Pro recognize the plugin:
 ```bash
-auval -v aufx At01 AntT
+auval -v aufx Sq01 Sinq
 ```
 You should see `AU VALIDATION SUCCEEDED.` at the bottom of the output.
 
 ---
 
-## 🎤 How to Use AntiTune
+## 🎤 How to Use sinq
 
 ### Using the Standalone App (Mic -> Headphones)
-1. Double-click **`AntiTune.app`**.
+1. Double-click **`sinq.app`**.
 2. Click **Options -> Audio/MIDI Settings...** in the top-left corner of the window.
 3. Select your **Input** (Microphone / Audio Interface) and **Output** (Wired Headphones).
 4. Set **Audio buffer size** to **`64`** or **`128` samples** (~1.5–2.5 ms latency) for live monitoring.

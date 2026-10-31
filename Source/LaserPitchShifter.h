@@ -5,7 +5,7 @@
 #include <cmath>
 #include <algorithm>
 
-namespace antitune
+namespace sinq
 {
 
 // Clean, non-ringing 2nd-order Butterworth/SVF Bandpass for the Studio Vocoder
@@ -346,4 +346,4 @@ private:
     std::array<float, kNumVocoderBands> bandGains {};
 };
 
-} // namespace antitune
+} // namespace sinq

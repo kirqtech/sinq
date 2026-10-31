@@ -19,7 +19,7 @@ void setupRotaryKnob(juce::Slider& slider, juce::Label& label, const juce::Strin
 }
 } // namespace
 
-AntiTuneAudioProcessorEditor::AntiTuneAudioProcessorEditor(AntiTuneAudioProcessor& p)
+SinqAudioProcessorEditor::SinqAudioProcessorEditor(SinqAudioProcessor& p)
     : AudioProcessorEditor(&p), audioProcessor(p)
 {
     setLookAndFeel(&customLookAndFeel);
@@ -101,13 +101,13 @@ AntiTuneAudioProcessorEditor::AntiTuneAudioProcessorEditor(AntiTuneAudioProcesso
     startTimerHz(30);
 }
 
-AntiTuneAudioProcessorEditor::~AntiTuneAudioProcessorEditor()
+SinqAudioProcessorEditor::~SinqAudioProcessorEditor()
 {
     stopTimer();
     setLookAndFeel(nullptr);
 }
 
-void AntiTuneAudioProcessorEditor::timerCallback()
+void SinqAudioProcessorEditor::timerCallback()
 {
     const bool vocOn = audioProcessor.getAPVTS().getRawParameterValue("vocoderOn")->load() > 0.5f;
     vocoderMixSlider.setEnabled(vocOn);
@@ -115,7 +115,7 @@ void AntiTuneAudioProcessorEditor::timerCallback()
     repaint();
 }
 
-void AntiTuneAudioProcessorEditor::mouseDown(const juce::MouseEvent& event)
+void SinqAudioProcessorEditor::mouseDown(const juce::MouseEvent& event)
 {
     const auto pt = event.position;
     for (int i = 0; i < 12; ++i)
@@ -130,7 +130,7 @@ void AntiTuneAudioProcessorEditor::mouseDown(const juce::MouseEvent& event)
     }
 }
 
-void AntiTuneAudioProcessorEditor::paint(juce::Graphics& g)
+void SinqAudioProcessorEditor::paint(juce::Graphics& g)
 {
     juce::ColourGradient bgGrad(juce::Colour(0xff0b0e17), 0.0f, 0.0f,
                                 juce::Colour(0xff131829), 0.0f, static_cast<float>(getHeight()), false);
@@ -146,7 +146,7 @@ void AntiTuneAudioProcessorEditor::paint(juce::Graphics& g)
 
     g.setColour(juce::Colour(0xff00f0ff));
     g.setFont(juce::Font(juce::FontOptions(22.0f).withStyle("Bold")));
-    g.drawText("ANTITUNE", 28, 18, 150, 26, juce::Justification::centredLeft);
+    g.drawText("SINQ", 28, 18, 150, 26, juce::Justification::centredLeft);
 
     g.setColour(juce::Colour(0xff94a3b8));
     g.setFont(juce::Font(juce::FontOptions(10.5f)));
@@ -188,7 +188,7 @@ void AntiTuneAudioProcessorEditor::paint(juce::Graphics& g)
                452, 396, 380, 16, juce::Justification::centredLeft);
 }
 
-void AntiTuneAudioProcessorEditor::drawLaserGauge(juce::Graphics& g, juce::Rectangle<float> bounds)
+void SinqAudioProcessorEditor::drawLaserGauge(juce::Graphics& g, juce::Rectangle<float> bounds)
 {
     g.setColour(juce::Colour(0xff121728));
     g.fillRoundedRectangle(bounds, 10.0f);
@@ -231,7 +231,7 @@ void AntiTuneAudioProcessorEditor::drawLaserGauge(juce::Graphics& g, juce::Recta
 
     int displayedMidi = targetMidi + static_cast<int>(std::llround(pitchSt));
     juce::String noteStr = (voiced && targetMidi > 0)
-        ? juce::String(antitune::ScaleQuantizer::midiNoteToString(displayedMidi))
+        ? juce::String(sinq::ScaleQuantizer::midiNoteToString(displayedMidi))
         : juce::String("--");
 
     g.setColour((voiced && targetMidi > 0) ? (isLaser ? juce::Colour(0xff00f0ff) : juce::Colours::white) : juce::Colour(0xff475569));
@@ -263,7 +263,7 @@ void AntiTuneAudioProcessorEditor::drawLaserGauge(juce::Graphics& g, juce::Recta
                static_cast<int>(bounds.getWidth() - 24), 18, juce::Justification::centred);
 }
 
-void AntiTuneAudioProcessorEditor::drawPitchHistoryGraph(juce::Graphics& g, juce::Rectangle<float> bounds)
+void SinqAudioProcessorEditor::drawPitchHistoryGraph(juce::Graphics& g, juce::Rectangle<float> bounds)
 {
     g.setColour(juce::Colour(0xff101423));
     g.fillRoundedRectangle(bounds, 10.0f);
@@ -278,14 +278,14 @@ void AntiTuneAudioProcessorEditor::drawPitchHistoryGraph(juce::Graphics& g, juce
         g.drawHorizontalLine(static_cast<int>(y), bounds.getX() + 8.0f, bounds.getRight() - 8.0f);
     }
 
-    std::array<AntiTuneAudioProcessor::HistoryPoint, AntiTuneAudioProcessor::kHistorySize> hist;
+    std::array<SinqAudioProcessor::HistoryPoint, SinqAudioProcessor::kHistorySize> hist;
     int writePos = 0;
     audioProcessor.getPitchHistory(hist, writePos);
 
     float centerMidi = 57.0f;
-    for (int i = 0; i < AntiTuneAudioProcessor::kHistorySize; ++i)
+    for (int i = 0; i < SinqAudioProcessor::kHistorySize; ++i)
     {
-        int idx = (writePos - 1 - i + AntiTuneAudioProcessor::kHistorySize) % AntiTuneAudioProcessor::kHistorySize;
+        int idx = (writePos - 1 - i + SinqAudioProcessor::kHistorySize) % SinqAudioProcessor::kHistorySize;
         if (hist[static_cast<size_t>(idx)].voiced && hist[static_cast<size_t>(idx)].targetMidi > 20.0f)
         {
             centerMidi = hist[static_cast<size_t>(idx)].targetMidi;
@@ -309,11 +309,11 @@ void AntiTuneAudioProcessorEditor::drawPitchHistoryGraph(juce::Graphics& g, juce
     const float padX = 12.0f;
     const float usableW = bounds.getWidth() - padX * 2.0f;
 
-    for (int i = 0; i < AntiTuneAudioProcessor::kHistorySize; ++i)
+    for (int i = 0; i < SinqAudioProcessor::kHistorySize; ++i)
     {
-        int idx = (writePos + i) % AntiTuneAudioProcessor::kHistorySize;
+        int idx = (writePos + i) % SinqAudioProcessor::kHistorySize;
         const auto& pt = hist[static_cast<size_t>(idx)];
-        float x = bounds.getX() + padX + (static_cast<float>(i) / static_cast<float>(AntiTuneAudioProcessor::kHistorySize - 1)) * usableW;
+        float x = bounds.getX() + padX + (static_cast<float>(i) / static_cast<float>(SinqAudioProcessor::kHistorySize - 1)) * usableW;
 
         if (pt.voiced && pt.inputMidi > 20.0f)
         {
@@ -362,7 +362,7 @@ void AntiTuneAudioProcessorEditor::drawPitchHistoryGraph(juce::Graphics& g, juce
                static_cast<int>(bounds.getWidth() - 28), 18, juce::Justification::centredLeft);
 }
 
-void AntiTuneAudioProcessorEditor::drawScaleKeyboard(juce::Graphics& g, juce::Rectangle<float> bounds)
+void SinqAudioProcessorEditor::drawScaleKeyboard(juce::Graphics& g, juce::Rectangle<float> bounds)
 {
     g.setColour(juce::Colour(0xff14192b));
     g.fillRoundedRectangle(bounds, 10.0f);
@@ -407,11 +407,11 @@ void AntiTuneAudioProcessorEditor::drawScaleKeyboard(juce::Graphics& g, juce::Re
         g.setColour(isPlaying ? juce::Colour(0xff090d16)
                               : (enabled ? juce::Colours::white : juce::Colour(0xff475569)));
         g.setFont(juce::Font(juce::FontOptions(13.5f).withStyle("Bold")));
-        g.drawText(antitune::ScaleQuantizer::kNoteNames[i], r.toNearestInt(), juce::Justification::centred);
+        g.drawText(sinq::ScaleQuantizer::kNoteNames[i], r.toNearestInt(), juce::Justification::centred);
     }
 }
 
-void AntiTuneAudioProcessorEditor::resized()
+void SinqAudioProcessorEditor::resized()
 {
     // Top bar controls
     keyCombo.setBounds(206, 23, 66, 32);

@@ -4,7 +4,7 @@
 #include <cmath>
 #include <algorithm>
 
-namespace antitune
+namespace sinq
 {
 
 struct PitchDetectionResult
@@ -190,4 +190,4 @@ private:
     PitchDetectionResult lastResult;
 };
 
-} // namespace antitune
+} // namespace sinq
